@@ -1,10 +1,4 @@
-/snap/clion/265/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/265/bin/ninja/linux/x64/ninja -G Ninja -S /home/wiktor/CLionProjects/SysOps/SysOps -B /home/wiktor/CLionProjects/SysOps/SysOps/cmake-build-debug
--- The C compiler identification is GNU 11.4.0
--- Detecting C compiler ABI info
--- Detecting C compiler ABI info - done
--- Check for working C compiler: /usr/bin/cc - skipped
--- Detecting C compile features
--- Detecting C compile features - done
--- Configuring done (3.2s)
+/snap/clion/265/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/265/bin/ninja/linux/x64/ninja -G Ninja -S /home/wiktor/CLionProjects/SysOps -B /home/wiktor/CLionProjects/SysOps/cmake-build-debug
+-- Configuring done (0.0s)
 -- Generating done (0.0s)
--- Build files have been written to: /home/wiktor/CLionProjects/SysOps/SysOps/cmake-build-debug
+-- Build files have been written to: /home/wiktor/CLionProjects/SysOps/cmake-build-debug
