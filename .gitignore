@@ -1,5 +1,5 @@
-# Ignorowanie plików związanych z IDE Cliona
 .idea/
-
-# Ignorowanie plików obiektowych
 *.o
+/.idea/
+/cmake-build-*/
+**/build/
