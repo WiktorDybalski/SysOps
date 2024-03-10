@@ -39,5 +39,18 @@ test_shared: client_shared
 	./client_shared
 test_dynamic: client_dynamic
 	./client_dynamic
+
+# Generate objdump for static client
+objdump_static: client_static
+	objdump -d client_static > client_static_objdump.txt
+
+# Generate objdump for shared client
+objdump_shared: client_shared
+	objdump -d client_shared > client_shared_objdump.txt
+
+# Generate objdump for dynamic client
+objdump_dynamic: client_dynamic
+	objdump -d client_dynamic > client_dynamic_objdump.txt
+
 clean:
-	rm -f *.a *.o *.so client_static client_shared client_dynamic
+	rm -f *.a *.o *.so client_static client_shared client_dynamic client_static_objdump.txt client_shared_objdump.txt client_dynamic_objdump.txt
