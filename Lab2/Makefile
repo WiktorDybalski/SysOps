@@ -1,25 +1,43 @@
+# Compiler used is gcc
 CXX = gcc
+
+# C flags common in all build configurations
+# disable all optimizations and add debug information in debug build
+cflags.debug := -g -O0
+# enable O2 optimization in release mode
+cflags.release := -O2
+
+# Compiler flags: -Wall (enable all warnings), -Wextra (enable extra warnings), -g (include debugging information)
 CFLAGS = -Wall -Wextra -g
 
 .PHONY: all static_lib shared_lib client_static client_shared client_dynamic clean
 
 all: static_lib shared_lib client_static client_shared client_dynamic
-#utworzenie biblioteki statycznej z rozszerzeniem .a
+# Creating static library with .a extension
 static_lib:
 	gcc -c collatz.c
 	ar rcs libcollatz.a collatz.o
-#utworzenie bilioteki dynamicznej z rozszerzeniem .so
+# Creating dynamic library with .a extension
 shared_lib:
 	gcc -fPIC -c collatz.c
 	gcc -shared collatz.o -o libcollatz.so
-#utworzenie klienta z biblioteką statyczną
+
+# Creating client with static library
 client_static: static_lib
 	gcc client.c libcollatz.a -o client_static
-#utworzenie klienta z biblioteką współdzieloną
+# Creating client with shared library
 client_shared: shared_lib
-	gcc client.c -L. -libcollatz -Wl, -rpath=. -o client_shared
-#utworzenie klienta z biblioteką dynamiczną
+	gcc client.c -L. -lcollatz -Wl,-rpath=. -o client_shared
+# Creating client with dynamic library
 client_dynamic:
 	gcc client_dynamic.c -o client_dynamic -ldl
+
+# Test clients
+test_static: client_static
+	./client_static
+test_shared: client_shared
+	./client_shared
+test_dynamic: client_dynamic
+	./client_dynamic
 clean:
 	rm -f *.a *.o *.so client_static client_shared client_dynamic
