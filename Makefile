@@ -1,9 +1,9 @@
 CXX = gcc
 CFLAGS = -Wall -Wextra -g
 
-.PHONY: all clean
+.PHONY: all static_lib shared_lib client_static client_shared client_dynamic clean
 
-all: static_lib shared_lib client_static
+all: static_lib shared_lib client_static client_shared client_dynamic
 #utworzenie biblioteki statycznej z rozszerzeniem .a
 static_lib:
 	gcc -c collatz.c
