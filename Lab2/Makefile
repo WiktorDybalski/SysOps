@@ -30,7 +30,7 @@ client_shared: shared_lib
 	gcc client.c -L. -lcollatz -Wl,-rpath=. -o client_shared
 # Creating client with dynamic library
 client_dynamic:
-	gcc client_dynamic.c -o client_dynamic -ldl
+	gcc client.c -o client_dynamic -ldl -D DYNAMIC_DLOPEN
 
 # Test clients
 test_static: client_static
