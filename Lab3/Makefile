@@ -5,13 +5,16 @@ CFLAGS = -Wall -Wextra -O0 -g
 
 .PHONY: all main clean
 
-all: main
+all: create_files main
 
-main: test_files
+find_files:
+	$(CXX) $(CFLAGS) -o find find.c
+	./find
+main: main
 	$(CXX) $(CFLAGS) -o main main.c
 	./main
 
-test_files: create_reversed_file3 create_reversed_file4
+create_files: create_reversed_file3 create_reversed_file4
 
 create_reversed_file3:
 	echo "" > reversed_file3
