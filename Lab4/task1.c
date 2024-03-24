@@ -5,17 +5,17 @@
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
-        perror("Wrong amount of arguments");
+        fprintf(stderr, "Wrong number of arguments: Failed\n");
         return -1;
     }
     int number_of_processes = atoi(argv[1]);
     for (int i = 0; i < number_of_processes; i++) {
-        pid_t pid = fork();
-        if (pid == -1) {
+        pid_t child_pid = fork();
+        if (child_pid == -1) {
             perror("fork error");
             return 1;
-        } else if (pid == 0) {
-            printf("\nParent PID: %d, child PID %d\n", getppid(), getpid());
+        } else if (child_pid == 0) {
+            printf("\nParent PID: %d, child PID: %d\n", getppid(), getpid());
             exit(0);
         }
     }
