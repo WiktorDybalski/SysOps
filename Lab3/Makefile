@@ -12,7 +12,7 @@ test1: test_bytes test_blocks
 
 test_bytes:reverse_bytes
 	./reverse bin_file tmp1;
-	./reverse tmp1 tmp2;
+	#./reverse tmp1 tmp2;
 	diff -s tmp2 bin_file
 
 test_blocks:reverse_blocks

@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <time.h>
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 10
 
 void byte_reading(FILE *file, FILE *reversed_file, long file_size) {
     for (long i = file_size - 1; i >= 0; i--) {
@@ -75,12 +75,14 @@ int main(int argc, char *argv[]) {
     fseek(file, 0, SEEK_END);
     file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
+
     #if defined(BYTES)
     start = clock();
     byte_reading(file, reversed_file, file_size);
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     fprintf(time_file, "Czas wykonania (1 bajt): %f sekund\n", cpu_time_used);
+
     #elif !defined(BYTES)
     start = clock();
     big_byte_reading(file, reversed_file, file_size);
