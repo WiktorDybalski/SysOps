@@ -8,6 +8,13 @@ set(CMAKE_C_COMPILER gcc)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(untitled
-        collatz.c
-        dynamic_client.c
-        client.c)
+        Lab2/collatz.c
+        Lab2/client.c
+        Lab3/reverse.c
+        Lab3/find.c
+        Lab4/task1.c
+        Lab4/task2.c
+        Lab5/task1.c
+        Lab5/catcher.c
+        Lab5/sender.c
+)

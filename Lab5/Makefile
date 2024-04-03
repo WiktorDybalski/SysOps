@@ -1,7 +1,7 @@
 CXX = gcc
-CFLAGS = -Wall -Wextra -00 -g
+CFLAGS = -Wall -Wextra -O0 -g
 
-.PHONY: all task1 task2 test1 test2
+.PHONY: all task1 test1 task2 test2 sender catcher
 
 all: test1 test2
 
@@ -9,22 +9,24 @@ test1: task1
 
 task1:
 	$(CXX) $(CFLAGS) -o task1 task1.c
-	./task1 none
 	./task1 ignore
 	./task1 handler
 	./task1 mask
-
+	./task1 none
 
 test2: task2
 
-task2:
-	$(gcc) $(CFLAGS) -o catcher catcher.c
-	$(gcc) $(CFLAGS) -o sender sender.c
+task2: catcher sender
+
+catcher:
+	$(CXX) $(CFLAGS) -o catcher catcher.c
 	./catcher
-	./sender <PID> 1
+
+sender:
+	$(CXX) $(CFLAGS) -o sender sender.c
 
 clean:
-	rm -f task1 task2
+	rm -f task1 catcher sender
 
 
 

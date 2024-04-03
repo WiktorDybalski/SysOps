@@ -1,7 +1,8 @@
 #include <stdio.h>
 
 #ifndef DYNAMIC_DLOPEN
-    #include "collatz.c"
+    int collatz_conjecture(int input);
+    int test_collatz_convergence(int input, int max_iter);
 #endif
 
 #ifdef DYNAMIC_DLOPEN

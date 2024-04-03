@@ -2,48 +2,53 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <unistd.h>
+#include <string.h>
 
-int mode_change_requests = 0;
+int mode = -1;
+int number_of_requests = 0;
 
-void handle_sigusr1(int sig, siginfo_t *info, void *ucontext) {
-    mode_change_requests++;
-    int sender_pid = info->si_pid;
-    union sigval value;
-    printf("Odebrano sygnał SIGUSR1 od PID: %d\n", sender_pid);
+void SIGUSR1_action(int sig, siginfo_t *info, void *context) {
+        pid_t sender_pid = info -> si_pid;
+        int int_val = info->si_int;
+        mode = info->si_value.sival_int;
+        printf("Received request %d from sender with PID: %d\n", int_val, sender_pid);
 
-    switch (info->si_value.sival_int) {
-        case 1:
-            for (int i = 1; i <= 100; i++) {
-                printf("%d\n", i);
-            }
-            break;
-        case 2:
-            printf("Liczba żądań zmiany trybu pracy: %d\n", mode_change_requests);
-            break;
-        case 3:
-            printf("Zakończenie pracy.\n");
-            exit(0);
-        default:
-            printf("Nieznany tryb pracy.\n");
-    }
+        number_of_requests++;
+        mode = int_val;
 
-    // Wysyłanie potwierdzenia do sendera
-    sigqueue(sender_pid, SIGUSR1, value);
+        kill(sender_pid, SIGUSR1);
 }
 
 int main() {
-    printf("PID catchera: %d\n", getpid());
+    printf("Catcher PID: %d\n", getpid());
 
-    struct sigaction sa;
-    sa.sa_flags = SA_SIGINFO;
-    sa.sa_sigaction = handle_sigusr1;
-    sigemptyset(&sa.sa_mask);
-    sigaction(SIGUSR1, &sa, NULL);
+    struct sigaction action;
+    action.sa_sigaction = SIGUSR1_action;
+    action.sa_flags = SA_SIGINFO;
 
-    // Czekanie na sygnały
+    sigemptyset(&action.sa_mask);
+    sigaction(SIGUSR1, &action, NULL);
+
     while (1) {
-        pause();
+        switch(mode) {
+            case 1:
+                for (int i = 1; i <= 100; i++) {
+                    printf("%i, ", i);
+                }
+                printf("\n");
+                mode = -1;
+                break;
+            case 2:
+                printf("Number of requests: %d\n", number_of_requests);
+                mode = -1;
+                break;
+            case 3:
+                printf("Exit signal\n");
+                exit(EXIT_SUCCESS);
+            default:
+                printf("Catcher is waiting\n");
+                pause();
+                break;
+        }
     }
-
-    return 0;
 }

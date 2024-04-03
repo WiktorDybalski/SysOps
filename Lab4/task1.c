@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
             perror("fork error");
             return 1;
         } else if (child_pid == 0) {
-            printf("\nParent PID: %d, child PID: %d\n", getppid(), getpid());
+            printf("\nParent PID: %d, child %d PID: %d\n", getppid(), i, getpid());
             exit(0);
         }
     }
