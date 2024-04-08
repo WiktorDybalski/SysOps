@@ -62,6 +62,14 @@ int main(int argc, char *argv[]) {
         wait(NULL);
     }
 
+    FILE *time_file = fopen("time_file.txt", "a");
+    if (time_file == NULL) {
+        printf("There is no such file");
+        fclose(time_file);
+    }
+    fprintf(time_file, "Time: %lf, Amount of processes: %d, Width: %lf\n", execution_time, number_of_proc, width);
+    fclose(time_file);
+
     printf("Width of sub-intervals: %lf, Number of processes: %d\n", width, number_of_proc);
     printf("Execution time: %.6f seconds\n", execution_time);
     printf("Integration result: %lf\n", total);
