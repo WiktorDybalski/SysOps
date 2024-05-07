@@ -1,5 +1,5 @@
 CXX = gcc
-CFLAGS = -W -Wextra -g -lrt
+CFLAGS = -W -Wextra -g -lrt -pthread
 
 all: run
 
