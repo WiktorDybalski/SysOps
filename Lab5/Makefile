@@ -16,7 +16,7 @@ task1:
 
 test2: task2
 
-task2: catcher sender
+task2: sender catcher
 
 catcher:
 	$(CXX) $(CFLAGS) -o catcher catcher.c

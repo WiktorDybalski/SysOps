@@ -17,4 +17,12 @@ add_executable(untitled
         Lab5/task1.c
         Lab5/catcher.c
         Lab5/sender.c
+        Lab6/task1.c
+        Lab6/task2.c
+        Lab6/calculate_integration.c
+        Lab7/client.c
+        Lab7/server.c
+        Lab8/client.c
+        Lab8/printer.c
+        Lab8/config.h
 )

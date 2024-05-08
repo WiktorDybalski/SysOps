@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <wait.h>
-#include <sys/time.h>
 #include <fcntl.h>
 
 #define FIFO_PATH "/tmp/my_fifo"
