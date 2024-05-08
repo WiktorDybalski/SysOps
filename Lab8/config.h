@@ -1,5 +1,3 @@
-
-#define QUEUE_LEN  10
 #define PRINT_SIZE  10
 #define MAX_PRINTERS 10
 #define SHARED_MEMORY "shared_memory"

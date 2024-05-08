@@ -4,7 +4,7 @@
 #include <string.h>
 #include <time.h>
 
-#define SERVER_LIFESPAN 100
+#define SERVER_LIFESPAN 200
 #define SERVER_QUEUE_NAME "/server-queue"
 #define MAX_CLIENTS_NUMBER 4
 #define QUEUE_PERMISSIONS 0660

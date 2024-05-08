@@ -37,15 +37,18 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    if (ftruncate(shm_fd, sizeof(PrintQueue)) < 0) {
-        perror("ftruncate");
-        return -1;
-    }
-
     PrintQueue *queue = mmap(0, sizeof(PrintQueue), PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
 
     if (queue == MAP_FAILED) {
         perror("mmap");
+        return -1;
+    }
+
+    signal(SIGINT, signal_handler);
+
+    if (queue->number_of_printers <= 0) {
+        printf("Error: No printers available!\n");
+        munmap(queue, sizeof(PrintQueue));
         return -1;
     }
 
@@ -55,16 +58,16 @@ int main(int argc, char** argv) {
         if (client_pid == 0) {
             char buffer[PRINT_SIZE + 1];
             srand(time(NULL) ^ (getpid() << 16));
-            while (end == false){
-                sleep(rand() % 4 + 3);
+            while (!end){
+                sleep(rand() % 5 + 3);
                 generate_random_string(buffer, PRINT_SIZE);
 
                 int printer_index = -1;
-                for (int i = 0; i < queue->number_of_printers; i++) {
+                for (int j = 0; j < queue->number_of_printers; j++) {
                     int val;
-                    sem_getvalue(&queue->printers[i].printer_semaphore, &val);
+                    sem_getvalue(&queue->printers[j].printer_semaphore, &val);
                     if(val > 0) {
-                        printer_index = i;
+                        printer_index = j;
                         break;
                     }
                 }
@@ -75,6 +78,9 @@ int main(int argc, char** argv) {
                     perror("sem_wait");
                 }
                 strcpy(queue->printers[printer_index].printer_buffer, buffer);
+                queue->printers[printer_index].printer_buffer_size = PRINT_SIZE;
+                printf("Sending printing request to printer number: %d\n", printer_index);
+                fflush(stdout);
                 queue->printers[printer_index].printer_state = PRINTING;
             }
             exit(0);
