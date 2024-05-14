@@ -57,11 +57,15 @@ int main(int argc, char **argv) {
     pthread_t threads[num_threads];
     ThreadData data[num_threads];
 
-    int cell_per_thread = (int) (GRID_HEIGHT * GRID_WIDTH / num_threads);
+    int cell_per_thread = (GRID_HEIGHT * GRID_WIDTH / num_threads);
 
     for (int i = 0; i < num_threads; i++) {
         data[i].start = i * cell_per_thread;
-        data[i].end = (i + 1) * cell_per_thread;
+        if ((i + 1) * cell_per_thread > GRID_HEIGHT * GRID_WIDTH) {
+            data[i].end = GRID_HEIGHT * GRID_WIDTH;
+        } else {
+            data[i].end = (i + 1) * cell_per_thread;
+        }
 
         data[i].current = &foreground;
         data[i].next = &background;
