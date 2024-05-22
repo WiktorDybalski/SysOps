@@ -7,6 +7,8 @@
 #include <time.h>
 #include <signal.h>
 #include <pthread.h>
+#include <math.h>
+
 
 int num_threads;
 
@@ -57,7 +59,7 @@ int main(int argc, char **argv) {
     pthread_t threads[num_threads];
     ThreadData data[num_threads];
 
-    int cell_per_thread = (GRID_HEIGHT * GRID_WIDTH / num_threads);
+    int cell_per_thread = ceil(GRID_HEIGHT * GRID_WIDTH / num_threads);
 
     for (int i = 0; i < num_threads; i++) {
         data[i].start = i * cell_per_thread;
@@ -76,14 +78,13 @@ int main(int argc, char **argv) {
 
     while (true) {
         draw_grid(foreground);
-        usleep(500 * 1000);
 
         for(int i = 0; i < num_threads; i++) {
             pthread_kill(threads[i], SIGUSR1);
         }
 
+        usleep(500 * 1000);
         // Step simulation
-        update_grid(foreground, background);
         tmp = foreground;
         foreground = background;
         background = tmp;

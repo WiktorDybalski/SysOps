@@ -9,7 +9,6 @@ compile:
 	$(CXX) $(CFLAGS) -o client2 client.c
 	$(CXX) $(CFLAGS) -o client3 client.c
 	$(CXX) $(CFLAGS) -o client4 client.c
-	$(CXX) $(CFLAGS) -o client5 client.c
 
 run:
 	./server
