@@ -36,7 +36,9 @@ void receive_messages() {
     while ((bytes_read = recv(client_socket, buffer, BUFFER_SIZE - 1, 0)) > 0) {
         buffer[bytes_read] = '\0';
         if (strncmp(buffer, "PING", 4) == 0) {
-            send(client_socket, "PONG", 4, 0);
+            char pong_msg[BUFFER_SIZE];
+            snprintf(pong_msg, sizeof(pong_msg), "%d:PONG", client_id);
+            send(client_socket, pong_msg, strlen(pong_msg), 0);
         } else {
             printf("%s\n", buffer);
         }
@@ -44,14 +46,14 @@ void receive_messages() {
 }
 
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     if (argc != 4) {
         fprintf(stderr, "Usage: %s <name> <server_address> <server_port>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
     strcpy(client_name, argv[1]);
-    char* server_address = argv[2];
+    char *server_address = argv[2];
     int server_port = atoi(argv[3]);
 
     struct sockaddr_in server_addr;
@@ -67,7 +69,7 @@ int main(int argc, char* argv[]) {
     server_addr.sin_addr.s_addr = inet_addr(server_address);
     server_addr.sin_port = htons(server_port);
 
-    if (connect(client_socket, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+    if (connect(client_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
         perror("connect");
         close(client_socket);
         exit(EXIT_FAILURE);

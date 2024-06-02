@@ -15,9 +15,9 @@
 
 typedef struct {
     int client_id;
-    int sockfd;
-    time_t last_ping;
+    int sock_fd;
     int ping_waiting;
+    time_t last_ping;
 } client_info;
 
 client_info clients[MAX_CLIENTS_NUMBER];
@@ -27,9 +27,9 @@ int epoll_fd;
 void init_client_info() {
     for (int i = 0; i < MAX_CLIENTS_NUMBER; i++) {
         clients[i].client_id = -1;
-        clients[i].sockfd = -1;
-        clients[i].last_ping = 0;
+        clients[i].sock_fd = -1;
         clients[i].ping_waiting = 0;
+        clients[i].last_ping = 0;
     }
 }
 
@@ -43,10 +43,8 @@ void handle_init(int client_socket) {
     } else {
         for (int i = 0; i < MAX_CLIENTS_NUMBER; i++) {
             if (clients[i].client_id < 0) {
-                clients[i].sockfd = client_socket;
+                clients[i].sock_fd = client_socket;
                 clients[i].client_id = i;
-                clients[i].last_ping = time(NULL);
-                clients[i].ping_waiting = 0;
 
                 struct epoll_event event;
                 event.events = EPOLLIN;
@@ -54,7 +52,8 @@ void handle_init(int client_socket) {
                 epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket, &event);
 
                 sprintf(msg, "%d", i);
-                printf("Creating client with client_id: %d, and sock_fd: %d\n", clients[i].client_id, clients[i].sockfd);
+                printf("Creating client with client_id: %d, and sock_fd: %d\n", clients[i].client_id,
+                       clients[i].sock_fd);
                 send(client_socket, msg, strlen(msg), 0);
                 client_count++;
                 break;
@@ -80,24 +79,31 @@ void list(int client_socket) {
     send(client_socket, buffer, offset, 0);
 }
 
+void format_time(char *buffer, size_t buffer_size, time_t time_val) {
+    struct tm *tm_info = localtime(&time_val);
+    strftime(buffer, buffer_size, "%Y-%m-%d %H:%M:%S", tm_info);
+}
+
 void to_all(int client_id, char* msg) {
     printf("Processing: 2ALL\n");
     char buffer[BUFFER_SIZE];
-    snprintf(buffer, sizeof(buffer), "Client with ID %d: %s", client_id, msg);
+    char time_buffer[BUFFER_SIZE];
+    format_time(time_buffer, sizeof(time_buffer), time(NULL));
+    snprintf(buffer, sizeof(buffer), "Date: %s, Client with ID %d: %s", time_buffer, client_id, msg);
     for (int i = 0; i < MAX_CLIENTS_NUMBER; i++) {
         if (clients[i].client_id >= 0 && clients[i].client_id != client_id) {
-            send(clients[i].sockfd, buffer, strlen(buffer), 0);
+            send(clients[i].sock_fd, buffer, strlen(buffer), 0);
         }
     }
 }
 
-void to_one(int sender_id, int receiver_id, char* msg) {
+void to_one(int sender_id, int receiver_id, char *msg) {
     printf("Processing: 2ONE\n");
     char buffer[BUFFER_SIZE];
     snprintf(buffer, sizeof(buffer), "Client with ID %d: %s", sender_id, msg);
     for (int i = 0; i < MAX_CLIENTS_NUMBER; i++) {
         if (clients[i].client_id == receiver_id) {
-            send(clients[i].sockfd, buffer, strlen(buffer), 0);
+            send(clients[i].sock_fd, buffer, strlen(buffer), 0);
             break;
         }
     }
@@ -106,10 +112,10 @@ void to_one(int sender_id, int receiver_id, char* msg) {
 void handle_stop(int client_socket) {
     printf("Processing: STOP\n");
     for (int i = 0; i < MAX_CLIENTS_NUMBER; i++) {
-        if (clients[i].sockfd == client_socket) {
+        if (clients[i].sock_fd == client_socket) {
             printf("Client with ID %d disconnected\n", clients[i].client_id);
-            close(clients[i].sockfd);
-            clients[i].sockfd = -1;
+            close(clients[i].sock_fd);
+            clients[i].sock_fd = -1;
             clients[i].client_id = -1;
             client_count--;
             break;
@@ -118,21 +124,20 @@ void handle_stop(int client_socket) {
 }
 
 void alive() {
-    time_t now = time(NULL);
     for (int i = 0; i < MAX_CLIENTS_NUMBER; i++) {
-        if (clients[i].sockfd != 0) {
+        if (clients[i].sock_fd != -1) {
             if (clients[i].ping_waiting) {
                 // Client did not respond to the last ping
-                close(clients[i].sockfd);
-                clients[i].sockfd = 0;
-                client_count--;
                 printf("Client %d removed due to no ping response\n", clients[i].client_id);
+                close(clients[i].sock_fd);
+                clients[i].sock_fd = -1;
+                clients[i].client_id = -1;
+                client_count--;
             } else {
-                // Send ping
-                char* ping_msg = "PING";
-                send(clients[i].sockfd, ping_msg, strlen(ping_msg), 0);
+                char *ping_msg = "PING";
+                send(clients[i].sock_fd, ping_msg, strlen(ping_msg), 0);
                 clients[i].ping_waiting = 1;
-                clients[i].last_ping = now;
+                clients[i].last_ping = time(NULL);
             }
         }
     }
@@ -146,9 +151,17 @@ void handle_client_message(int client_socket) {
     } else {
         buffer[bytes_read] = '\0';
         int client_id = atoi(strtok(buffer, ":"));
-        char* token = strtok(NULL, ":");
+        char *token = strtok(NULL, ":");
         printf("Received from ClientID %d, message: %s\n", client_id, token);
-        if (strcmp(token, "LIST") == 0) {
+        if (strcmp(token, "PONG") == 0) {
+            for (int i = 0; i < MAX_CLIENTS_NUMBER; i++) {
+                if (clients[i].sock_fd == client_socket) {
+                    clients[i].ping_waiting = 0;
+                    clients[i].last_ping = time(NULL);
+                    break;
+                }
+            }
+        } else if (strcmp(token, "LIST") == 0) {
             list(client_socket);
         } else if (strcmp(token, "2ALL") == 0) {
             token = strtok(NULL, ":");
@@ -165,12 +178,12 @@ void handle_client_message(int client_socket) {
     }
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     if (argc != 3) {
         fprintf(stderr, "Usage: %s <server_address> <server_port>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
-    char* address = argv[1];
+    char *address = argv[1];
     int port = atoi(argv[2]);
 
     int server_socket;
@@ -187,7 +200,7 @@ int main(int argc, char* argv[]) {
     server_addr.sin_addr.s_addr = inet_addr(address);
     server_addr.sin_port = htons(port);
 
-    if (bind(server_socket, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+    if (bind(server_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
         perror("bind");
         close(server_socket);
         exit(EXIT_FAILURE);
@@ -220,8 +233,8 @@ int main(int argc, char* argv[]) {
     }
 
     struct epoll_event events[MAX_EVENTS];
-    init_client_info(clients);
-
+    init_client_info();
+    time_t last_ping_time = time(NULL);
     while (1) {
         int event_count = epoll_wait(epoll_fd, events, MAX_EVENTS, PING_INTERVAL * 1000);
         if (event_count < 0) {
@@ -234,7 +247,7 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < event_count; i++) {
             if (events[i].data.fd == server_socket) {
                 if (events[i].events & EPOLLIN) {
-                    int client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &client_addr_len);
+                    int client_socket = accept(server_socket, (struct sockaddr *) &client_addr, &client_addr_len);
                     if (client_socket < 0) {
                         perror("accept");
                         continue;
@@ -247,8 +260,11 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-
-        //alive();
+        time_t current_time = time(NULL);
+        if (difftime(current_time, last_ping_time) >= PING_INTERVAL) {
+            alive();
+            last_ping_time = current_time;
+        }
     }
 
     close(server_socket);
