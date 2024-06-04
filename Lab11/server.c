@@ -84,7 +84,7 @@ void format_time(char *buffer, size_t buffer_size, time_t time_val) {
     strftime(buffer, buffer_size, "%Y-%m-%d %H:%M:%S", tm_info);
 }
 
-void to_all(int client_id, char* msg) {
+void to_all(int client_id, char *msg) {
     printf("Processing: 2ALL\n");
     char buffer[BUFFER_SIZE];
     char time_buffer[BUFFER_SIZE];
@@ -100,7 +100,9 @@ void to_all(int client_id, char* msg) {
 void to_one(int sender_id, int receiver_id, char *msg) {
     printf("Processing: 2ONE\n");
     char buffer[BUFFER_SIZE];
-    snprintf(buffer, sizeof(buffer), "Client with ID %d: %s", sender_id, msg);
+    char time_buffer[BUFFER_SIZE];
+    format_time(time_buffer, sizeof(time_buffer), time(NULL));
+    snprintf(buffer, sizeof(buffer), "Date: %s, Client with ID %d: %s", time_buffer, sender_id, msg);
     for (int i = 0; i < MAX_CLIENTS_NUMBER; i++) {
         if (clients[i].client_id == receiver_id) {
             send(clients[i].sock_fd, buffer, strlen(buffer), 0);
@@ -212,8 +214,6 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    printf("=================================== Server has started ==========================================\n");
-    printf("Address: %s, Port: %d\n", address, port);
 
     epoll_fd = epoll_create1(0);
     if (epoll_fd < 0) {
@@ -234,7 +234,13 @@ int main(int argc, char *argv[]) {
 
     struct epoll_event events[MAX_EVENTS];
     init_client_info();
+
+    time_t current_time;
     time_t last_ping_time = time(NULL);
+
+    printf("=================================== Server has started ==========================================\n");
+    printf("Address: %s, Port: %d\n", address, port);
+
     while (1) {
         int event_count = epoll_wait(epoll_fd, events, MAX_EVENTS, PING_INTERVAL * 1000);
         if (event_count < 0) {
@@ -260,13 +266,13 @@ int main(int argc, char *argv[]) {
                 }
             }
         }
-        time_t current_time = time(NULL);
+        current_time = time(NULL);
         if (difftime(current_time, last_ping_time) >= PING_INTERVAL) {
             alive();
             last_ping_time = current_time;
         }
     }
-
+    shutdown(server_socket, SHUT_RDWR);
     close(server_socket);
     close(epoll_fd);
     return 0;

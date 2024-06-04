@@ -11,7 +11,6 @@
 int client_socket;
 int client_id;
 int child_pid;
-char client_name[BUFFER_SIZE];
 
 void handle_sigint(int sig) {
     char buffer[BUFFER_SIZE];
@@ -47,14 +46,13 @@ void receive_messages() {
 
 
 int main(int argc, char *argv[]) {
-    if (argc != 4) {
+    if (argc != 3) {
         fprintf(stderr, "Usage: %s <name> <server_address> <server_port>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
-    strcpy(client_name, argv[1]);
-    char *server_address = argv[2];
-    int server_port = atoi(argv[3]);
+    char *server_address = argv[1];
+    int server_port = atoi(argv[2]);
 
     struct sockaddr_in server_addr;
     char buffer[BUFFER_SIZE];
@@ -110,7 +108,7 @@ int main(int argc, char *argv[]) {
         printf("Sending message: %s\n", message);
         send(client_socket, message, strlen(message), 0);
     }
-
+    shutdown(client_socket, SHUT_RDWR);
     close(client_socket);
     return 0;
 }
