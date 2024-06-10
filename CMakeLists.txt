@@ -25,4 +25,7 @@ add_executable(untitled
         Lab8/client.c
         Lab8/printer.c
         Lab8/config.h
+        Lab9/grid.c
+        Lab9/life.c
+        Lab10/main.c
 )

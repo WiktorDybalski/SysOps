@@ -7,7 +7,8 @@ all: task1 task2 calculate_integration
 
 task1:
 	$(CXX) $(CFLAGS) -o task1 task1.c
-	./task1 0.0000000005, 40
+	./task1 0.0000000005, 13
+	./task1 0.0000000005, 12
 	./task1 0.0000000005, 10
 	./task1 0.0000000005, 4
 	./task1 0.0000000005, 1

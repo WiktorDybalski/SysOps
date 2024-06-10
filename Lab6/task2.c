@@ -19,13 +19,13 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    write(fifo_fd, &start, sizeof(start));
-    write(fifo_fd, &end, sizeof(end));
+    write(fifo_fd, &start, sizeof(double));
+    write(fifo_fd, &end, sizeof(double));
 
     close(fifo_fd);
 
     fifo_fd = open(FIFO_PATH, O_RDONLY);
-    read(fifo_fd, &result, sizeof(result));
+    read(fifo_fd, &result, sizeof(double));
     close(fifo_fd);
 
     printf("Integration result: %lf\n", result);
